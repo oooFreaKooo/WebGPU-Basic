@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
+    "module": "ESNext", // Use ESNext for module system
+    "moduleResolution": "bundler", // Use module resolution for bundlers like Vite
+    "allowImportingTsExtensions": true, // Allow .ts extensions in imports
+    "noEmit": true, // Do not emit output (Vite handles this)
+    "incremental": true,
+    "strict": false,
+    "noImplicitAny": true,
+    "strictFunctionTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "sourceMap": true,
+    "removeComments": true,
+    "types": [
+      "@webgpu/types",
+      "node"
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "vite.config.ts",
+    "assets"
+  ]
+}

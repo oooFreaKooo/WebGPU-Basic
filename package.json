@@ -1,0 +1,40 @@
+{
+  "name": "code",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --open",
+    "install-missing-dependencies": "yarn install",
+    "build": "vite build",
+    "serve": "vite preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "browser": {
+    "fs": false,
+    "os": false,
+    "path": false,
+    "util": false
+  },
+  "keywords": [],
+  "author": "Roman Koller",
+  "license": "ISC",
+  "dependencies": {
+    "gl-matrix": "^3.4.3"
+  },
+  "devDependencies": {
+    "@types/gl-matrix": "^3.2.0",
+    "@types/node": "^22.7.4",
+    "@typescript-eslint/eslint-plugin": "^8.7.0",
+    "@typescript-eslint/parser": "^8.7.0",
+    "@webgpu/types": "^0.1.46",
+    "eslint": "^9.11.1",
+    "ts-shader-loader": "^2.0.2",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.8",
+    "vite-plugin-string": "^1.2.3"
+  },
+  "packageManager": "yarn@4.5.0"
+}

@@ -1,49 +1,42 @@
-import * as presets from '../utils/preset-scenes'
-import { Scene } from './scene'
-import { Renderer } from './renderer'
-import { ObjectProperties } from '../utils/preset-scenes'
-
+import { Scene } from '@babylonjs/core'
+import { WebGPUEngine } from '@babylonjs/core/Engines/webgpuEngine'
+import { CameraSetup } from './camera'
+import { LightSetup } from './light'
+import { SceneSetup } from './scene'
 
 export class Application {
     private canvas: HTMLCanvasElement
-    private renderer: Renderer
-    private scene: Scene
+    private engine: WebGPUEngine | undefined
+    private scene: Scene | undefined
 
     constructor (canvas: HTMLCanvasElement) {
         this.canvas = canvas
-        this.scene = new Scene(canvas)
-        this.renderer = new Renderer(this.canvas, this.scene)
     }
 
-    // Start the application with a default scene or select a scene externally
-    async start () {
-        
-        // Public preset scenes available for selection
-        const presetScenes: { [key: string]: ObjectProperties[] } = {
-            cornellBox: presets.createCornellBox(),        // Cornell box with a front wall
-            cornellBox2: presets.createCornellBox2(),      // Cornell box without the front wall
-            cornellBox3: presets.createCornellBox3(),      // Cornell box with mirrored walls
-            cornellBox4: presets.createCornellBox4(),      // Empty Cornell box
-            scene1: presets.createScene1(),                // Refraction roughness test
-            scene2: presets.createScene2(),                // IOR test
-            scene3: presets.createScene3(),                // Refraction color test
-            scene4: presets.createScene4(),                // Reflection test
-            scene5: presets.createScene5(),                // Reflection roughness test
-            scene6: presets.createScene6(),                // Emission color test
-            scene7: presets.createScene7(),                // Cornell boxes wall
-            scene8: presets.createScene8(),                // Dragon model
-            scene9: presets.createScene9(),                // Monkeys with random materials
-            scene10: presets.createScene10(),              // Lamp with glass donut
-            scene11: presets.createScene11(),              // Glass of water with caustics
-            scene12: presets.createScene12(),              // Objects with different materials
-            scene13: presets.createScene13(),              // Sphereflake fractal (depth = 5)
-            scene14: presets.createScene14(),              // Spheres with mixed materials
-            scene15: presets.createScene15(),              // DNA
-        }
-        // Directly use a preset scene like cornellBox (or any scene of your choice)
-        await this.scene.createObjects(presetScenes.cornellBox)
+    async start (): Promise<void> {
+        const webgpuSupported = await WebGPUEngine.IsSupportedAsync
 
-        // Initialize the renderer
-        await this.renderer.Initialize()
+        if (webgpuSupported) {
+            this.engine = new WebGPUEngine(this.canvas, { antialias: true })
+            await this.engine.initAsync()
+            this.scene = new Scene(this.engine)
+            
+            const dirLight = new LightSetup(this.scene).setupLights()
+
+            // Initialize scene elements with the directional light
+            new SceneSetup(this.scene).setupScene(dirLight, this.canvas)
+
+            // Start rendering the scene
+            this.engine.runRenderLoop(() => {
+                this.scene?.render()
+            })
+
+            // Resize the engine if the window is resized
+            window.addEventListener('resize', () => {
+                this.engine?.resize()
+            })
+        } else {
+            console.warn('WebGPU not supported on this device.')
+        }
     }
 }

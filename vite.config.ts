@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite'
-import path from 'path'
-import vitePluginString from 'vite-plugin-string'
+import { defineConfig } from 'vite';
+import path from 'path';
+import vitePluginString from 'vite-plugin-string';
 
 export default defineConfig({
     root: './', 
@@ -24,6 +24,6 @@ export default defineConfig({
             '@models': path.resolve(__dirname, 'src/assets/models'),
             '@textures': path.resolve(__dirname, 'src/assets/textures'),
         },
-        extensions: [ '.js', '.ts' ],
+        extensions: ['.js', '.ts'],
     },
-})
+});

@@ -5,6 +5,41 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
+"@babylonjs/core@npm:^7.32.5":
+  version: 7.32.5
+  resolution: "@babylonjs/core@npm:7.32.5"
+  checksum: 10c0/a61e5c37f3586bb5fe2ed035713b639877b856b13659ca1d381f612055e3f898df6c1a4d294357c8cf885600aabe78a9907927e0cc6effbf4c5f20f347c6127d
+  languageName: node
+  linkType: hard
+
+"@babylonjs/gui@npm:^7.33.0":
+  version: 7.33.0
+  resolution: "@babylonjs/gui@npm:7.33.0"
+  peerDependencies:
+    "@babylonjs/core": ^7.0.0
+  checksum: 10c0/f7517f6df2ab8f6c42e302ad34299e9ed3526d507654a3ee6adc94964f2bc34d47b03f5089cfbc8acfccb8286911cee0fa62fdb19cd30ad5061b3aacf43caf21
+  languageName: node
+  linkType: hard
+
+"@babylonjs/loaders@npm:^7.32.5":
+  version: 7.32.5
+  resolution: "@babylonjs/loaders@npm:7.32.5"
+  peerDependencies:
+    "@babylonjs/core": ^7.0.0
+    babylonjs-gltf2interface: ^7.0.0
+  checksum: 10c0/c62f10ff87c005f769226cd07ce6b307cdc812c8fc544900e498ff814703cbc4deac39ca6332ef0566f064efc03b7ed5f7ec238cb17caef7ae255c83df6d03e1
+  languageName: node
+  linkType: hard
+
+"@babylonjs/materials@npm:^7.32.5":
+  version: 7.32.5
+  resolution: "@babylonjs/materials@npm:7.32.5"
+  peerDependencies:
+    "@babylonjs/core": ^7.0.0
+  checksum: 10c0/ce1bc14144c981122d6491c42e31ee962d14921835535814f9c1a1c3d36fe051544146586f12717b44299bbb4e5144c7c3dae84c67d2fc996b8f374a48cd6e08
+  languageName: node
+  linkType: hard
+
 "@esbuild/aix-ppc64@npm:0.21.5":
   version: 0.21.5
   resolution: "@esbuild/aix-ppc64@npm:0.21.5"
@@ -764,6 +799,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cannon-es@npm:^0.20.0":
+  version: 0.20.0
+  resolution: "cannon-es@npm:0.20.0"
+  checksum: 10c0/e301919c28e481f1f71496cc6c47952675c3f3cbaa8328341388b3a96d322ac2b436ad0bd6481e9567245ba076bfc93da147bb59e2129b7bf68bb3cda7317a3e
+  languageName: node
+  linkType: hard
+
 "chalk@npm:^4.0.0":
   version: 4.1.2
   resolution: "chalk@npm:4.1.2"
@@ -792,11 +834,16 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "code@workspace:."
   dependencies:
+    "@babylonjs/core": "npm:^7.32.5"
+    "@babylonjs/gui": "npm:^7.33.0"
+    "@babylonjs/loaders": "npm:^7.32.5"
+    "@babylonjs/materials": "npm:^7.32.5"
     "@types/gl-matrix": "npm:^3.2.0"
     "@types/node": "npm:^22.7.4"
     "@typescript-eslint/eslint-plugin": "npm:^8.7.0"
     "@typescript-eslint/parser": "npm:^8.7.0"
     "@webgpu/types": "npm:^0.1.46"
+    cannon-es: "npm:^0.20.0"
     eslint: "npm:^9.11.1"
     gl-matrix: "npm:^3.4.3"
     ts-shader-loader: "npm:^2.0.2"

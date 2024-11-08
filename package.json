@@ -22,6 +22,11 @@
   "author": "Roman Koller",
   "license": "ISC",
   "dependencies": {
+    "@babylonjs/core": "^7.32.5",
+    "@babylonjs/gui": "^7.33.0",
+    "@babylonjs/loaders": "^7.32.5",
+    "@babylonjs/materials": "^7.32.5",
+    "cannon-es": "^0.20.0",
     "gl-matrix": "^3.4.3"
   },
   "devDependencies": {

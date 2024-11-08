@@ -1,146 +1,88 @@
-import { Camera } from '../components/camera'
-import { vec3 } from 'gl-matrix'
-import { Controls } from '../components/controls'
-import { ObjLoader } from '../components/obj-loader'
-import { TLAS } from '../bvh/tlas'
-import { BLAS } from '../bvh/blas'
-import { BLASInstance } from '../bvh/blas-instance'
-import { Material } from '../components/material'
-import { ObjectProperties } from '../utils/preset-scenes'
+import * as BABYLON from '@babylonjs/core'
+import { FurMaterial } from '@babylonjs/materials'
+import '@babylonjs/loaders/glTF'
+import { Unit } from './unit' // Adjust the path as needed
+import { CameraSetup } from './camera'
+import { UnitControls } from './unit_controls'
 
-export class Scene {
-    // Rendering settings
-    enableACES = 1.0
-    enableFilmic = 0.0
-    enableGammaCorrection = 1.0
+export class SceneSetup {
+    private scene: BABYLON.Scene
+    private ground: BABYLON.Mesh
+    private furMaterial: FurMaterial
+    private knight: Unit
 
-    skyMode: number = 0
-    enableCulling = 1
-    maxBounces = 8
-    samples = 1
-    jitterScale = 1.0
-
-    // Camera and controls
-    camera: Camera = new Camera([ 0.01, 2.5, -7 ])
-    cameraControls: Controls
-
-    // Object and material data
-    materials: Material[] = []
-    private objectMeshes: ObjLoader[] = []
-    private materialToIdxMap = new Map<Material, number>()
-
-    // BVH structures
-    blasArray: BLAS[] = []
-    blasInstanceArray: BLASInstance[] = []
-    private uniqueGeometries = new Map<string, BLAS>()
-    private totalBLASNodeCount = 0
-    private nextMeshID = 0
-
-    // Mapping relationships
-    blasTriangleOffsetMap = new Map<string, number>()
-    private blasNodeOffsetMap = new Map<string, number>()
-    private blasOffsetToMeshIDMap = new Map<number, number>()
-    private meshIDToBLAS = new Map<number, BLAS>()
-
-    // Top-Level Acceleration Structure
-    tlas!: TLAS
-
-    constructor (canvas: HTMLCanvasElement) {
-        this.cameraControls = new Controls(canvas, this.camera)
+    constructor (scene: BABYLON.Scene) {
+        this.scene = scene
+        this.setupMouseControl()
     }
 
-    async createObjects (objects: ObjectProperties[]) {
-        for (const { modelPath, material, position = [ 0, 0, 0 ], scale = [ 1, 1, 1 ], rotation = [ 0, 0, 0 ] } of objects) {
+    setupScene (dirLight: BABYLON.DirectionalLight, canvas: HTMLCanvasElement): void {
+        // Set up the ground and shadows
+        this.createGround(dirLight)
+        // Create the knight character
+        const units: Unit[] = []
+        units.push(new Unit(this.scene, 'Knight.glb', new BABYLON.Vector3(0, 0, 0)))
+        units.push(new Unit(this.scene, 'Knight.glb', new BABYLON.Vector3(1, 0, 0)))
+        units.push(new Unit(this.scene, 'Knight.glb', new BABYLON.Vector3(2, 0, 0)))
+        units.push(new Unit(this.scene, 'Knight.glb', new BABYLON.Vector3(3, 0, 0)))
+        units.push(new Unit(this.scene, 'Knight.glb', new BABYLON.Vector3(4, 0, 0)))
+        units.push(new Unit(this.scene, 'Knight.glb', new BABYLON.Vector3(5, 0, 0)))
+        // Set up the unit controls
+        new UnitControls(this.scene, units)
+        // Initialize camera and lights
+        const cameraSetup = new CameraSetup(this.scene, canvas)
+        cameraSetup.setupCamera( )
 
-            const objectMesh = await this.loadObjectMesh(modelPath)
+        this.createGrass(dirLight)
+        
+        // Set background color
+        this.scene.clearColor = new BABYLON.Color4(0.4, 0.6, 0.9, 1.0)
+    }
 
-            const blas = this.getOrCreateBLAS(modelPath, objectMesh.triangles)
-
-            const meshID = this.nextMeshID++
-
-            this.mapMeshToBLAS(meshID, blas.nodeOffset, blas.blas)
-
-            this.blasOffsetToMeshIDMap.set(blas.nodeOffset, meshID)
-
-            const materialIdx = this.getMaterialIndex(material)
-
-            this.createBLASInstance(position, scale, rotation, blas.nodeOffset, materialIdx)
+    private setupMouseControl (): void {
+        this.scene.onPointerDown = (evt, pickResult) => {
+            if (pickResult.hit && pickResult.pickedMesh === this.ground) {
+                // Set target position to clicked point on the ground
+                const targetPosition = pickResult.pickedPoint
+                this.knight.moveTo(targetPosition)
+            }
         }
-
-        // Initialize TLAS after all objects are processed
-        this.tlas = new TLAS(this.blasInstanceArray, this.blasOffsetToMeshIDMap, this.meshIDToBLAS)
     }
 
-    private async loadObjectMesh (modelPath: string): Promise<ObjLoader> {
+    private createGround (dirLight: BABYLON.DirectionalLight): void {
+        this.ground = BABYLON.MeshBuilder.CreateGround('ground', { width: 50, height: 50 }, this.scene)
+        this.ground.receiveShadows = true
 
-        const objectMesh = new ObjLoader()
+        const groundMaterial = new BABYLON.StandardMaterial('groundMaterial', this.scene)
+        groundMaterial.diffuseTexture = new BABYLON.Texture('src/assets/textures/grass_ground.jpg', this.scene)
+        groundMaterial.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2)
+        this.ground.material = groundMaterial
 
-        await objectMesh.initialize(modelPath)
-
-        this.objectMeshes.push(objectMesh)
-
-        return objectMesh
+        const shadowGenerator = new BABYLON.ShadowGenerator(1024, dirLight)
+        shadowGenerator.addShadowCaster(this.ground)
     }
 
-    private getMaterialIndex (material: Material): number {
+    private createGrass (dirLight: BABYLON.DirectionalLight): void {
+        // Apply fur material to the ground
+        this.furMaterial = new FurMaterial('furMaterial', this.scene)
+        const furTexture = FurMaterial.GenerateTexture('furTexture', this.scene)
 
-        if (!this.materialToIdxMap.has(material)) {
+        this.furMaterial.furTexture = furTexture
+        this.furMaterial.furLength = 0.3
+        this.furMaterial.furAngle = 0
+        this.furMaterial.furColor = new BABYLON.Color3(1.2, 1.5, 1.2)
+        this.furMaterial.furSpacing = 0.25
+        this.furMaterial.furGravity = new BABYLON.Vector3(0, 1, 0)
+        this.furMaterial.furSpeed = 100 // Adjusted for dynamic visual response
+        this.furMaterial.furDensity = 30
+        this.furMaterial.highLevelFur = true
+        this.furMaterial.diffuseTexture = new BABYLON.Texture('src/assets/textures/grass_ground3.webp', this.scene)
 
-            this.materials.push(material)
+        this.ground.material = this.furMaterial
 
-            this.materialToIdxMap.set(material, this.materials.length - 1)
-        }
-        return this.materialToIdxMap.get(material)!
-    }
-
-    private createBLASInstance (
-        position: Float32Array | number[],
-        scale: Float32Array | number[],
-        rotation: Float32Array | number[],
-        nodeOffset: number,
-        materialIdx: number
-    ) {
-        this.blasInstanceArray.push(
-            new BLASInstance(
-                vec3.fromValues(position[0], position[1], position[2]),
-                vec3.fromValues(scale[0], scale[1], scale[2]),
-                vec3.fromValues(rotation[0], rotation[1], rotation[2]),
-                nodeOffset,
-                materialIdx
-            )
-        )
-    }
-
-    private getOrCreateBLAS (modelPath: string, triangles: any[]): { blas: BLAS; nodeOffset: number } {
-        const existingBLAS = this.uniqueGeometries.get(modelPath)
-        if (existingBLAS) {
-            const nodeOffset = this.blasNodeOffsetMap.get(existingBLAS.id)!
-            return { blas: existingBLAS, nodeOffset }
-        }
-    
-        const blasID = `blas_${this.blasArray.length}`
-        const newBLAS = new BLAS(blasID, triangles)
-        const nodeOffset = this.totalBLASNodeCount
-    
-        this.storeBLAS(newBLAS, modelPath, nodeOffset)
-    
-        return { blas: newBLAS, nodeOffset }
-    }
-    
-    private storeBLAS (blas: BLAS, modelPath: string, nodeOffset: number) {
-        this.blasArray.push(blas)
-        this.uniqueGeometries.set(modelPath, blas)
-        this.blasNodeOffsetMap.set(blas.id, nodeOffset)
-        // Ensure both maps are updated if needed
-        this.totalBLASNodeCount += blas.m_nodes.length
-    }
-    
-
-    private mapMeshToBLAS (meshID: number, nodeOffset: number, blas: BLAS) {
-
-        this.blasOffsetToMeshIDMap.set(nodeOffset, meshID)
-        this.meshIDToBLAS.set(meshID, blas)
+        const quality = 10
+        FurMaterial.FurifyMesh(this.ground, quality)
+        const shadowGenerator = new BABYLON.ShadowGenerator(1024, dirLight)
+        shadowGenerator.addShadowCaster(this.ground)
     }
 }
-
-
